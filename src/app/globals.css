@@ -1,0 +1,176 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-heading: var(--font-mono);
+  --font-sans: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+}
+
+/* ── VaultAuth dark theme (always dark) ───────────────────── */
+:root {
+  --background:        oklch(0.10 0.005 264);
+  --foreground:        oklch(0.95 0.005 264);
+  --card:              oklch(0.13 0.006 264);
+  --card-foreground:   oklch(0.95 0.005 264);
+  --popover:           oklch(0.13 0.006 264);
+  --popover-foreground:oklch(0.95 0.005 264);
+  --primary:           oklch(0.72 0.18 264);
+  --primary-foreground:oklch(0.10 0.005 264);
+  --secondary:         oklch(0.18 0.008 264);
+  --secondary-foreground:oklch(0.85 0.005 264);
+  --muted:             oklch(0.18 0.008 264);
+  --muted-foreground:  oklch(0.55 0.012 264);
+  --accent:            oklch(0.20 0.010 264);
+  --accent-foreground: oklch(0.90 0.005 264);
+  --destructive:       oklch(0.65 0.22 27);
+  --border:            oklch(1 0 0 / 8%);
+  --input:             oklch(1 0 0 / 10%);
+  --ring:              oklch(0.72 0.18 264 / 60%);
+  --radius:            0.5rem;
+
+  /* vault accent colors */
+  --vault-blue:        oklch(0.68 0.20 264);
+  --vault-blue-dim:    oklch(0.68 0.20 264 / 15%);
+  --vault-blue-glow:   oklch(0.68 0.20 264 / 30%);
+  --vault-cyan:        oklch(0.80 0.15 210);
+  --vault-green:       oklch(0.75 0.18 145);
+  --vault-amber:       oklch(0.80 0.18 70);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* ── Grid background pattern ──────────────────────────────── */
+.bg-grid {
+  background-image:
+    linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ── Noise texture overlay ────────────────────────────────── */
+.noise::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  opacity: 0.5;
+  z-index: 0;
+}
+
+/* ── Glow effects ─────────────────────────────────────────── */
+.glow-blue {
+  box-shadow: 0 0 40px var(--vault-blue-glow), 0 0 80px var(--vault-blue-dim);
+}
+
+.text-glow {
+  text-shadow: 0 0 30px var(--vault-blue-glow);
+}
+
+/* ── Animated gradient border ─────────────────────────────── */
+@keyframes border-spin {
+  to { --angle: 360deg; }
+}
+
+/* ── Fade-in stagger animations ───────────────────────────── */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.6s ease both;
+}
+
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+.delay-600 { animation-delay: 600ms; }
+
+/* ── Pulse dot ────────────────────────────────────────────── */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.8); }
+}
+
+.pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* ── Flow connector line ──────────────────────────────────── */
+@keyframes flow-line {
+  from { stroke-dashoffset: 48; }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* ── Shimmer ──────────────────────────────────────────────── */
+@keyframes shimmer {
+  from { background-position: -200% center; }
+  to   { background-position: 200% center; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--vault-blue) 0%,
+    var(--vault-cyan) 30%,
+    var(--vault-blue) 60%,
+    var(--vault-blue) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 4s linear infinite;
+}

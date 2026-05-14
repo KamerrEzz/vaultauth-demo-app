@@ -1,40 +1,20 @@
 # VaultAuth Demo App
 
-A minimal, dependency-free demo showing how any third-party application can integrate **VaultAuth** as its OAuth 2.0 / OIDC provider — the same pattern you'd use for "Login with Google" or "Login with GitHub".
+A developer demo showing how any third-party application can integrate **VaultAuth** as its OAuth 2.0 / OIDC identity provider — the same pattern you'd use for "Login with Google" or "Login with GitHub."
 
-> **No auth libraries.** Just `fetch`, Node's built-in `crypto`, and Next.js cookies.
+Built with **Next.js 15**, **React 19**, **NextAuth v5 (Auth.js)**, **shadcn/ui**, and **Tailwind CSS v4**.
+
+---
 
 ## What this demonstrates
 
-- Full Authorization Code flow with **PKCE** (S256)
-- **State parameter** validation to prevent CSRF
-- Server-side **token exchange** (access token never touches the browser)
-- **UserInfo** claim fetching
-- **httpOnly session cookie** for the authenticated session
-- Clean logout
+- Full Authorization Code flow with **PKCE** (S256) via NextAuth v5
+- Custom OAuth provider configuration pointing to VaultAuth
+- Server-side session via Auth.js (access token never touches the browser)
+- OIDC userinfo claim fetching (`openid profile email`)
+- Dark, developer-focused UI with shadcn/ui components
 
-## Architecture
-
-```
-Browser                    Demo App (port 3002)          VaultAuth (port 3000)
-   │                              │                              │
-   │── click "Login" ──────────►  │                              │
-   │                              │ generate PKCE + state        │
-   │                              │ store in httpOnly cookie     │
-   │◄── redirect ─────────────────│                              │
-   │                                                             │
-   │── GET /oauth/authorize ──────────────────────────────────►  │
-   │◄── redirect /callback?code=...&state=... ─────────────────  │
-   │                                                             │
-   │── GET /callback ──────────►  │                              │
-   │                              │ validate state               │
-   │                              │── POST /oauth/token ───────► │
-   │                              │◄── { access_token } ──────── │
-   │                              │── GET /oauth/userinfo ─────► │
-   │                              │◄── { sub, email, name } ──── │
-   │                              │ set session cookie           │
-   │◄── redirect / ───────────────│                              │
-```
+---
 
 ## Setup
 
@@ -50,10 +30,11 @@ npm install
 
 1. Open the VaultAuth developer portal: **http://localhost:3001/developer**
 2. Click **"New Application"**
-3. Fill in:
-   - **Name**: `VaultAuth Demo App` (or anything)
-   - **Redirect URI**: `http://localhost:3002/callback`
-4. Copy the **Client ID** (and optionally the **Client Secret**)
+3. Set the **Redirect URI** to exactly:
+   ```
+   http://localhost:3002/api/auth/callback/vaultauth
+   ```
+4. Copy the **Client ID** and **Client Secret**
 
 ### 3. Configure environment variables
 
@@ -65,10 +46,14 @@ Edit `.env.local`:
 
 ```env
 VAULTAUTH_URL=http://localhost:3000
-VAULTAUTH_CLIENT_ID=<paste your client_id here>
-VAULTAUTH_CLIENT_SECRET=          # optional if using PKCE only
+VAULTAUTH_CLIENT_ID=<your-client-id>
+VAULTAUTH_CLIENT_SECRET=<your-client-secret>
+
+# Generate with: openssl rand -base64 32
+AUTH_SECRET=<random-secret>
+AUTH_URL=http://localhost:3002
+
 NEXT_PUBLIC_APP_URL=http://localhost:3002
-VAULTAUTH_REDIRECT_URI=http://localhost:3002/callback
 ```
 
 ### 4. Start VaultAuth
@@ -85,50 +70,67 @@ npm run dev
 
 Open **http://localhost:3002** in your browser.
 
-## OAuth Endpoints Used
+---
 
-| Endpoint | Description |
-|---|---|
-| `GET /oauth/authorize` | Starts the flow — redirects user to login |
-| `POST /oauth/token` | Exchanges authorization code for tokens |
-| `GET /oauth/userinfo` | Returns user claims with Bearer token |
-| `GET /.well-known/openid-configuration` | OIDC discovery (for reference) |
+## VaultAuth OAuth Endpoints
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/oauth/authorize` | GET | Authorization endpoint (starts the flow) |
+| `/oauth/token` | POST | Token exchange (code → access_token) |
+| `/oauth/userinfo` | GET | User claims (Bearer token required) |
+| `/.well-known/openid-configuration` | GET | OIDC Discovery document |
+
+Issuer: `http://localhost:3000`  
+Scopes: `openid profile email`  
+Token signing: HS256 JWT (access tokens), opaque (refresh tokens)
+
+---
+
+## Architecture
+
+```
+Browser                  Demo App (port 3002)         VaultAuth (port 3000)
+   │                            │                              │
+   │── click "Login" ─────────► │                              │
+   │◄── redirect ───────────────│ (NextAuth generates PKCE)    │
+   │                                                           │
+   │── GET /oauth/authorize ─────────────────────────────────► │
+   │◄── redirect /api/auth/callback/vaultauth?code=... ──────  │
+   │                                                           │
+   │── GET /api/auth/callback ──► │                            │
+   │                              │── POST /oauth/token ─────► │
+   │                              │◄── { access_token } ─────  │
+   │                              │── GET /oauth/userinfo ────► │
+   │                              │◄── { sub, email, name } ── │
+   │                              │ set httpOnly session cookie │
+   │◄── redirect / ──────────────│                             │
+```
+
+---
 
 ## File Structure
 
 ```
+auth.ts                          # NextAuth v5 config (custom VaultAuth provider)
 src/
 ├── app/
-│   ├── api/
-│   │   ├── login/route.ts        # Generates PKCE, redirects to VaultAuth
-│   │   └── logout/route.ts       # Clears session cookie
-│   ├── callback/
-│   │   └── page.tsx              # Handles OAuth callback (Server Component)
-│   ├── layout.tsx
-│   ├── page.tsx                  # Home — landing or logged-in view
-│   └── page.module.css
-└── lib/
-    ├── pkce.ts                   # PKCE + state generation (Node crypto)
-    └── session.ts                # Session cookie encode/decode
+│   ├── api/auth/[...nextauth]/
+│   │   └── route.ts             # NextAuth catch-all route
+│   ├── login/
+│   │   └── page.tsx             # /login — centered sign-in card
+│   ├── layout.tsx               # Root layout with Providers
+│   ├── page.tsx                 # / — landing (unauthenticated) or profile (authenticated)
+│   ├── providers.tsx            # SessionProvider wrapper
+│   └── globals.css              # Tailwind v4 + custom dark theme
+└── components/
+    ├── vault-icon.tsx           # VaultAuth shield SVG
+    ├── login-card.tsx           # Sign-in card (client component)
+    ├── landing-view.tsx         # Hero + flow diagram + endpoint reference
+    └── authenticated-view.tsx  # User profile card
 ```
 
-## PKCE Implementation
-
-```ts
-import { randomBytes, createHash } from 'crypto'
-
-const verifier = randomBytes(32).toString('base64url')
-const challenge = createHash('sha256').update(verifier).digest('base64url')
-```
-
-The `verifier` is stored in an `httpOnly` cookie before the redirect. After the callback, it's sent to the token endpoint to prove the flow wasn't hijacked.
-
-## Security Notes
-
-- The `access_token` is **never sent to the browser** — all token handling is server-side.
-- The `state` parameter is validated on callback to prevent CSRF attacks.
-- Session data is stored in an `httpOnly`, `SameSite=Lax` cookie (base64-encoded JSON).
-- In production, set `secure: true` on cookies (handled automatically when `NODE_ENV=production`).
+---
 
 ## Scripts
 

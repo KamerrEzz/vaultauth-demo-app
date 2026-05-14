@@ -1,7 +1,8 @@
-import type { NextConfig } from 'next'
+import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Auth.js v5 uses a Next.js middleware wrapper internally;
+  // no extra config needed for the custom provider.
 }
 
 export default nextConfig
