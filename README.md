@@ -81,9 +81,6 @@ NEXT_PUBLIC_APP_URL=http://localhost:3002
 AUTH_URL=http://localhost:3002
 # Generate with: openssl rand -base64 32
 AUTH_SECRET=<random-secret>
-
-# Must match exactly what you registered in VaultAuth developer portal
-VAULTAUTH_REDIRECT_URI=http://localhost:3002/callback
 ```
 
 ### 5. Run the demo
