@@ -139,12 +139,12 @@ export function AuthenticatedView({ session }: AuthenticatedViewProps) {
               color: "oklch(0.50 0.012 264)",
             }}
           >
-            <span style={{ color: "oklch(0.68 0.20 264 / 80%)" }}>// </span>
+            <span style={{ color: "oklch(0.68 0.20 264 / 80%)" }}>{"// "}</span>
             Session stored in a{" "}
             <span style={{ color: "oklch(0.80 0.15 210)" }}>httpOnly</span>{" "}
             cookie via NextAuth v5.
             <br />
-            <span style={{ color: "oklch(0.68 0.20 264 / 80%)" }}>// </span>
+            <span style={{ color: "oklch(0.68 0.20 264 / 80%)" }}>{"// "}</span>
             Access token never exposed to the browser.
           </div>
 
