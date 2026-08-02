@@ -24,7 +24,7 @@ const vaultAuthProvider = {
       id: profile.sub,
       name: profile.name ?? profile.email,
       email: profile.email,
-      image: null,
+      image: profile.picture ?? null,
     }
   },
 }
